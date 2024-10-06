@@ -1,0 +1,23 @@
+Question 1
+
+Manhattan_data <- nyc_payroll_new |>
+  filter(Work_Location_Borough == "MANHATTAN") |>
+  summarise(
+    mean_base_salary_manhattan = mean(Base_Salary, na.rm = TRUE),
+    sd_base_salary_manhattan = sd(Base_Salary, na.rm = TRUE)
+  )
+Manhattan_data
+
+Queens_data <- nyc_payroll_new |>
+  filter(Work_Location_Borough == "QUEENS") |>
+  summarise(
+    mean_base_salary_queens = mean(Base_Salary, na.rm = TRUE),
+    sd_base_salary_queens = sd(Base_Salary, na.rm = TRUE)
+  )
+Queens_data
+
+Question 9
+
+nyc_payroll_new |> 
+  filter(!is.na(Base_Salary)) |> 
+  summarise(total_observations = n())
