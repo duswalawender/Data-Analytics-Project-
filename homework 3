@@ -1,0 +1,102 @@
+# Question 1
+
+library(tidyverse)
+library(skimr)
+
+oj <- read_csv("https://bcdanl.github.io/data/dominick_oj_na.csv")
+
+oj_tr <- oj |> 
+  filter(brand == "tropicana")
+
+oj_mm <- oj |> 
+  filter(brand == "minute.maid")
+
+oj_do <- oj |> 
+  filter(brand == "dominicks")
+
+oj_tr_sum <- skim(oj_tr)
+oj_mm_sum <- skim(oj_mm)
+oj_do_sum <- skim(oj_do)
+
+# Question 2
+
+oj_no_NA <- oj |> 
+  filter(!is.na(price) & !is.na(sales))
+
+# Question 3
+
+ggplot(data = oj, 
+       mapping = aes(x = price,
+                     fill = brand)) +
+  geom_histogram(show.legend = FALSE,  # `show.legend = FALSE` turns off legend
+                 binwidth = .1) +
+  facet_wrap(~ brand, 
+             ncol = 1)
+
+
+
+
+
+ggplot(data = oj, 
+       mapping = aes(x = price, color = brand, fill = brand)) +
+  geom_density(alpha = 0.3) +  # `alpha` controls transparency
+  labs(x = "Price", y = "Density", title = "Price Distribution by Brand") +
+  theme_minimal()
+
+
+
+#question idk
+
+ggplot(data = oj, 
+       mapping = aes(x = log10(sales),
+                     y = log10(price),
+                     color = brand,
+                     fill = brand)) +
+  geom_point(alpha = .1) +
+  geom_smooth(method = "lm")
+
+
+
+
+
+ggplot(data = oj, 
+       mapping = aes(x = log10(sales),
+                     y = log10(price),
+                     color = brand,
+                     fill = brand)) +
+  geom_point(alpha = .1) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ad_status)
+
+
+
+
+
+mlb_bat <- read_csv("https://bcdanl.github.io/data/MLB_batting.csv")
+
+ggplot(data = mlb_bat, 
+       mapping = aes(x = year, 
+                     y = percentage, 
+                     color = hit_type,
+                     fill = hit_type)) +
+  geom_line() + 
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Hits by Type in Major League Baseball",
+       x = "Major League Baseball Season",
+       y = "Percentage",
+       fill = "Hit",
+       color = "Hit")  # labs() allows for 
+# labeling x, y, color, fill, title, etc.
+
+
+
+
+
+
+
+
+
+
+
+
