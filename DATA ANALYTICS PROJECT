@@ -1,0 +1,103 @@
+# Load necessary libraries
+library(tidyverse)
+library(ggplot2)
+install.packages("ggthemes")
+library(ggthemes)
+# Load the dataset
+epl_players_2022 <- read_csv("http://bcdanl.github.io/data/epl_players_2022.csv")
+
+
+
+# Top Earners and What Team They Play For -----------------------------------------------------------------------
+
+
+
+# Get the top 8 highest-paid players
+top_6_players <- epl_players_2022 %>%
+  arrange(desc(salary_usd)) %>%  # Sort the players by salary (in descending order)
+  slice_head(n = 8) %>%  # Select the top 8 highest-paid players
+  select(player, squad, salary_usd) %>%  # Select only the columns for player name, team, and salary
+  mutate(salary_million = salary_usd / 1e6)  # Convert salary from USD to millions by dividing by 1 million
+
+# Create the bar chart for the top 6 highest-paid players (salary in millions)
+ggplot(top_6_players, aes(x = reorder(player, salary_million), y = salary_million, fill = squad)) +  # Create a ggplot with player names on the x-axis, salary in millions on the y-axis, and fill bars by team
+  geom_bar(stat = "identity") +  # Use bars to represent the actual salary values (not counts)
+  scale_fill_tableau() +
+  labs(  # Add titles and axis labels
+    title = "Top 6 Highest Paid Players and Their Teams",  # Title of the plot
+    x = "Player",  # Label for the x-axis (Player names)
+    y = "Salary (Millions USD)",  # Label for the y-axis (Salary in millions)
+    fill = "Team"  # Label for the legend (Team names)
+  ) +
+  coord_flip() +  # Flip the chart so the player names appear on the y-axis, making it easier to read
+  theme(  # Customize the appearance further
+    legend.position = "bottom"  # Place the legend at the bottom of the plot
+  )
+
+
+
+# Salary Distribution by Goals Scored -----------------------------------------------------------------------
+
+
+
+# Create a new column 'goal_bins' that categorizes players based on goals scored
+epl_players_2022 <- epl_players_2022 |>
+  mutate(goal_bins = cut(goals,  # Categorize players based on goals scored
+                         breaks = c(0, 5, 10, 15, 20, 25, Inf),  # Define the goal ranges
+                         labels = c("0-5", "6-10", "11-15", "16-20", "21-25", "26+"),  # Assign labels to the goal bins
+                         include.lowest = TRUE))  # Ensure that the lowest value (0 goals) is included in the first bin
+
+# Bar chart: Salary distribution by goal bins
+ggplot(epl_players_2022, aes(x = goal_bins, y = salary_usd, fill = goal_bins)) +  # Specify the x-axis (goal_bins), y-axis (salary_usd), and fill color by goal_bins
+  geom_bar(stat = "summary", fun = "mean", color = "black", show.legend = FALSE) +  # Use geom_bar with summary statistics (mean salary by bin), add black borders, and remove legend
+  scale_fill_tableau() +
+  scale_y_continuous(labels = scales::dollar_format(scale = 1e-6, suffix = "M")) +  # Format y-axis labels to display salary in millions (M)
+  labs(
+    title = "Average Salary by Goals Scored",  # Title for the chart
+    x = "Goals Scored (Binned)",  # Label for the x-axis
+    y = "Average Salary (in USD, millions)"  # Label for the y-axis
+  )
+
+
+
+
+# Top 5 Scorers Salary ----------------------------------------------------
+
+
+
+# Get the top 5 goal scorers
+top_5_goal_scorers <- epl_players_2022 |>
+  arrange(desc(goals)) |>  # Sort players by goals scored in descending order
+  slice_head(n = 5) |>  # Select the top 5 goal scorers
+  select(player, goals, salary_usd) |>  # Select relevant columns (player, goals, and salary)
+  mutate(salary_million = salary_usd / 1e6)  # Convert salary to millions
+
+# Create the bar chart for the top 5 goal scorers and their salaries
+ggplot(top_5_goal_scorers, aes(x = reorder(player, goals), y = salary_million, fill = player)) +  # Plot player names on the x-axis, salary in millions on the y-axis, and fill by player
+  geom_bar(stat = "identity") +  # Use bars to represent the salary values for each player
+  scale_fill_tableau() +
+  labs(
+    title = "Top 5 Goal Scorers and Their Salaries",  # Title of the plot
+    x = "Top 5 Scorers",  # Label for the x-axis (Player names)
+    y = "Salary (Millions USD)"  # Label for the y-axis (Salary in millions)
+  ) +
+  theme(
+    legend.position = "none"  # Remove the legend since it's redundant
+  )
+
+
+
+# Salary Depending on Position ---------------------------------------------
+
+
+
+ggplot(epl_players_2022, aes(x = pos, y = salary_usd / 1e6, fill = pos)) +  # Create a ggplot object with 'pos' as x-axis, salary scaled to millions on the y-axis, and 'pos' used to fill the boxes with colors
+  geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.shape = 16) +  # Create a boxplot, with transparency (alpha = 0.7), outliers shown in red color, and outliers as circle shapes
+  scale_fill_tableau() +
+  labs(  # Add labels to the chart
+    title = "Salary Disparities Across Positions",  # Title of the chart
+    x = "Position",  # Label for the x-axis (positions of players)
+    y = "Salary (in Millions USD)"  # Label for the y-axis (salary in millions of USD)
+  ) +
+  theme(legend.position = "none")  # Remove the legend as it's not needed (since positions are already labeled on the x-axis)
+
